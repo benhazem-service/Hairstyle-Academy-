@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق جمعية الحلاقة</title>
+    <title>تطبيق جمعية الحلاقة - المطور</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Firebase SDK -->
@@ -15,17 +15,15 @@
             --primary-color: #2c3e50;
             --accent-color: #e67e22;
             --success-color: #27ae60;
-            --danger-color: #e74c3c;
+            --danger-color: #c0392b;
             --warning-color: #f39c12;
-            --bg-color: #f8f9fa;
+            --partial-color: #d35400;
+            --bg-color: #f4f6f7;
             --card-bg: #ffffff;
-            --text-color: #2d3436;
-            --border-color: #eab;
+            --text-color: #333;
             --nav-height: 65px;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --sidebar-width: 260px; /* عرض القائمة الجانبية في وضع الكمبيوتر */
         }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -33,9 +31,10 @@
             margin: 0;
             padding: 0;
             color: var(--text-color);
-            padding-bottom: calc(var(--nav-height) + 30px); /* مساحة للقائمة السفلية */
-            font-size: 16px; /* خط مريح للقراءة */
-            overflow-x: hidden;
+            padding-bottom: calc(var(--nav-height) + 20px);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.3s ease;
         }
 
         /* --- Header --- */
@@ -43,127 +42,161 @@
             background-color: var(--primary-color);
             color: white;
             padding: 15px 20px;
-            text-align: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             position: sticky;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-bottom-left-radius: 15px;
-            border-bottom-right-radius: 15px;
         }
-        .mobile-header h2 { margin: 0; font-size: 1.2rem; font-weight: 700; }
-
-        /* --- Container & Cards --- */
-        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
+        .mobile-header h2 { margin: 0; font-size: 1.1rem; flex-grow: 1; text-align: center; }
         
-        .section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        /* أزرار تغيير المود */
+        .view-toggle { display: flex; gap: 10px; background: rgba(255,255,255,0.2); padding: 5px; border-radius: 20px; }
+        .view-btn { background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 1.1rem; padding: 2px 8px; transition: 0.3s; }
+        .view-btn.active { color: #fff; background: var(--accent-color); border-radius: 15px; }
+
+        /* --- Container --- */
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; transition: max-width 0.3s ease; }
+        
+        .section { display: none; animation: fadeIn 0.3s; }
         .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow);
-            border: 1px solid #f0f0f0;
-            transition: transform 0.2s;
+            background: var(--card-bg); border-radius: 12px; padding: 20px;
+            margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03); border: 1px solid #eee;
         }
-        .card:active { transform: scale(0.99); }
 
-        /* --- Stats Grid --- */
+        /* --- Stats --- */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .stat-box {
-            background: white; padding: 15px; border-radius: 12px; text-align: center;
-            box-shadow: var(--shadow); cursor: pointer; border: 1px solid #eee;
-        }
-        .stat-box h4 { margin: 0 0 5px; color: #636e72; font-size: 0.85rem; }
-        .stat-box p { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--primary-color); }
+        .stat-box { background: white; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .stat-box:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .stat-box h4 { margin: 0 0 5px; color: #7f8c8d; font-size: 0.85rem; }
+        .stat-box p { margin: 0; font-size: 1.4rem; font-weight: bold; color: var(--primary-color); }
 
-        /* --- Forms --- */
+        /* --- Forms & Tables --- */
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #444; }
-        input, select {
-            width: 100%; padding: 14px; border: 1px solid #ddd;
-            border-radius: 12px; font-size: 1rem; background-color: #fff;
-            transition: border-color 0.3s;
-        }
-        input:focus { border-color: var(--accent-color); }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; box-sizing: border-box; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-        button.btn-primary {
-            background-color: var(--accent-color); color: white; border: none; padding: 14px;
-            border-radius: 12px; width: 100%; font-size: 1rem; font-weight: 700; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); transition: 0.3s;
-        }
-        button.btn-primary:active { transform: translateY(2px); }
-
-        /* --- Tables --- */
-        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        button.btn-primary { background: var(--accent-color); color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; }
+        
+        .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 100%; }
-        th, td { text-align: right; padding: 14px 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        th { color: #888; font-weight: 600; font-size: 0.8rem; white-space: nowrap; }
-        .clickable-name { font-weight: bold; color: var(--primary-color); border-bottom: 1px dotted #ccc; }
+        th, td { text-align: right; padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { color: #777; font-weight: 600; white-space: nowrap; background: #f9f9f9; }
+        .clickable-name { font-weight: bold; color: var(--primary-color); border-bottom: 1px dashed #ccc; cursor: pointer; }
+        tr.clickable-row:hover { background-color: #f1f8ff; cursor: pointer; }
 
-        /* --- Badges --- */
-        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
-        .badge-paid { background: #d4edda; color: #155724; }
-        .badge-partial { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
-        .badge-due { background: #f8d7da; color: #721c24; }
-
-        /* --- Navigation --- */
+        /* --- Navigation (Default Mobile) --- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
             background-color: #fff; display: flex; justify-content: space-around;
-            align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 2000;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            padding-bottom: env(safe-area-inset-bottom); /* لآيفون */
+            align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
+            transition: all 0.3s ease;
         }
-        .nav-item {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: #b2bec3; border: none; background: none; font-size: 0.75rem; transition: 0.3s;
-        }
-        .nav-item.active { color: var(--accent-color); }
-        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
+        .nav-item { border: none; background: none; color: #95a5a6; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; flex: 1; }
+        .nav-item.active { color: var(--accent-color); font-weight: bold; }
+        .nav-item i { font-size: 1.3rem; margin-bottom: 4px; }
+        .nav-item span { display: block; } /* Text label */
 
-        /* --- Report Lists --- */
-        .report-list { list-style: none; padding: 0; margin: 0; }
-        .report-item { margin-bottom: 10px; border: 1px solid #eee; border-radius: 10px; overflow: hidden; }
-        .report-header { padding: 15px; display: flex; justify-content: space-between; cursor: pointer; background: #fff; font-weight: 600; }
-        .report-details { display: none; padding: 15px; background: #fafafa; border-top: 1px solid #eee; }
+        /* --- ================================== --- */
+        /* --- DESKTOP MODE STYLES (Professional) --- */
+        /* --- ================================== --- */
+        
+        body.desktop-mode {
+            padding-bottom: 0; /* Remove bottom padding */
+        }
+
+        body.desktop-mode .container {
+            max-width: 1400px; /* Wider layout */
+            margin-right: var(--sidebar-width); /* Push content left */
+            margin-left: 0;
+            padding: 30px;
+        }
+
+        body.desktop-mode .bottom-nav {
+            top: 0; right: 0; /* Move to right side */
+            width: var(--sidebar-width);
+            height: 100vh;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding-top: 80px; /* Space for header if needed, or adjust */
+            border-left: 1px solid #eee;
+            align-items: flex-start;
+        }
+
+        body.desktop-mode .nav-item {
+            flex-direction: row;
+            width: 100%;
+            padding: 15px 25px;
+            font-size: 1rem;
+            flex: 0 0 auto; /* Don't stretch */
+            color: var(--primary-color);
+            opacity: 0.7;
+        }
+
+        body.desktop-mode .nav-item:hover {
+            background-color: #f0f2f5;
+            opacity: 1;
+        }
+
+        body.desktop-mode .nav-item.active {
+            color: var(--accent-color);
+            background-color: #fff8f0;
+            border-right: 4px solid var(--accent-color);
+            opacity: 1;
+        }
+
+        body.desktop-mode .nav-item i {
+            margin-bottom: 0;
+            margin-left: 15px;
+            font-size: 1.2rem;
+            width: 25px; text-align: center;
+        }
+
+        /* Adjust Grid for Desktop */
+        body.desktop-mode .stats-grid {
+            grid-template-columns: repeat(4, 1fr); /* 4 columns instead of 2 */
+        }
+        body.desktop-mode .stat-box {
+            grid-column: span 1 !important; /* Force all to be 1 column */
+        }
+
+        body.desktop-mode .card {
+            border-radius: 8px; /* Sharper corners for pro look */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        body.desktop-mode .mobile-header {
+            width: calc(100% - var(--sidebar-width));
+            margin-right: var(--sidebar-width);
+            border-radius: 0;
+        }
+
+        /* --- Modals --- */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: flex-end; }
+        .modal-content { background: white; width: 100%; height: 90vh; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        
+        /* Adjust modal for desktop */
+        body.desktop-mode .modal { align-items: center; justify-content: center; }
+        body.desktop-mode .modal-content { width: 500px; height: auto; max-height: 90vh; border-radius: 10px; }
+
+        /* Report Styles */
+        .report-header { padding: 15px; display: flex; justify-content: space-between; cursor: pointer; background: #fff; border-bottom: 1px solid #eee; }
+        .report-details { display: none; padding: 15px; background: #fafafa; }
         .report-details.show { display: block; }
         
-        .val-inc { color: var(--success-color); }
-        .val-exp { color: var(--danger-color); }
+        .badge { padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: bold; }
+        .supply-checkbox-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
+        .supply-checkbox-item input { width: 20px; height: 20px; margin-left: 10px; }
 
-        /* --- Modals (Bottom Sheet Style) --- */
-        .modal {
-            display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); align-items: flex-end; opacity: 0; transition: opacity 0.3s;
-        }
-        .modal.show { display: flex; opacity: 1; }
-        .modal-content {
-            background: white; width: 100%; max-height: 85vh; 
-            border-top-left-radius: 25px; border-top-right-radius: 25px;
-            padding: 25px 20px; box-sizing: border-box; overflow-y: auto;
-            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .modal.show .modal-content { transform: translateY(0); }
-        
-        /* Modal Small for Balance */
-        .modal-small .modal-content { max-height: auto; width: 90%; margin: auto; bottom: 0; position: relative; border-radius: 15px; transform: none; }
-
-        /* --- Loading --- */
-        #loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff;
-            display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;
-        }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        /* Loading */
+        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Buttons Small */
-        .btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; color: white; display: inline-flex; align-items: center; justify-content: center; margin-left: 5px; }
-        .btn-blue { background: #3498db; } .btn-red { background: #e74c3c; }
 
     </style>
 </head>
@@ -171,21 +204,26 @@
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p style="margin-top:15px; font-weight:600; color:#555">جاري التحميل...</p>
+        <p style="margin-top:15px">جاري الاتصال...</p>
     </div>
 
     <div class="mobile-header">
+        <div class="view-toggle">
+            <button class="view-btn active" id="btnMobile" onclick="setMode('mobile')"><i class="fas fa-mobile-alt"></i></button>
+            <button class="view-btn" id="btnDesktop" onclick="setMode('desktop')"><i class="fas fa-desktop"></i></button>
+        </div>
         <h2><i class="fas fa-cut"></i> إدارة الجمعية</h2>
+        <div style="width: 60px;"></div> <!-- Spacer -->
     </div>
 
     <div class="container">
         
         <!-- صفحة الرئيسية -->
         <div id="home" class="section active">
-            <div class="card" onclick="window.showBalanceDetails()" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; text-align: center; padding: 25px;">
-                <p style="margin:0; opacity:0.8; font-size:0.9rem">الرصيد الصافي</p>
-                <h1 id="netBalance" style="margin:10px 0; font-size:2.8rem">0</h1>
-                <p style="margin:0; font-size:0.8rem">درهم مغربي</p>
+            <div class="card" onclick="window.showBalanceDetails()" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; text-align: center; cursor: pointer;">
+                <p style="margin:0; opacity:0.8">الرصيد الصافي (اضغط للتفاصيل)</p>
+                <h1 id="netBalance" style="margin:10px 0; font-size: 3rem;">0</h1>
+                <p style="margin:0">درهم</p>
             </div>
 
             <div class="stats-grid">
@@ -193,32 +231,37 @@
                     <h4>المتدربين</h4><p id="totalStudents">0</p>
                 </div>
                 <div class="stat-box" onclick="document.getElementById('monthlyReportCard').scrollIntoView({behavior: 'smooth'})">
-                    <h4>مداخيل (كلية)</h4><p id="totalIncome" style="color:var(--success-color)">0</p>
+                    <h4>المداخيل الكلية</h4><p id="totalIncome" style="color:green">0</p>
                 </div>
-                <div class="stat-box" style="grid-column: span 2;">
+                <div class="stat-box" id="currentMonthExpBox">
                     <h4>مصاريف هذا الشهر</h4><p id="currentMonthExpenses" style="color:var(--danger-color)">0</p>
+                </div>
+                <div class="stat-box" style="display: none;" id="extraStatBox"> <!-- For Desktop Layout Balance -->
+                    <!-- Placeholder for desktop grid -->
                 </div>
             </div>
 
+            <!-- الجداول -->
             <div class="card" style="border-right: 5px solid var(--danger-color);">
-                <h3 style="color:var(--danger-color); font-size:1rem"><i class="fas fa-exclamation-circle"></i> متأخرات الدفع (واجبة)</h3>
+                <h3 style="color:var(--danger-color); font-size:1.1rem;"><i class="fas fa-exclamation-circle"></i> متأخرات الدفع (واجبة)</h3>
                 <div class="table-responsive"><table id="overdueTable"><tbody></tbody></table></div>
             </div>
 
             <div class="card" style="border-right: 5px solid var(--warning-color);">
-                <h3 style="color:var(--warning-color); font-size:1rem"><i class="fas fa-clock"></i> استحقاق قريب (3 أيام)</h3>
+                <h3 style="color:var(--warning-color); font-size:1.1rem;"><i class="fas fa-clock"></i> استحقاق قريب (3 أيام)</h3>
                 <div class="table-responsive"><table id="upcomingTable"><tbody></tbody></table></div>
             </div>
 
             <div class="card" style="border-right: 5px solid #3498db;">
-                <h3 style="color:#3498db; font-size:1rem"><i class="fas fa-file-contract"></i> نواقص ملفات التسجيل</h3>
+                <h3 style="color:#3498db; font-size:1.1rem;"><i class="fas fa-file-contract"></i> نواقص ملفات التسجيل</h3>
                 <div class="table-responsive"><table id="missingTable"><tbody></tbody></table></div>
             </div>
 
+            <!-- التقرير الشهري -->
             <div class="card" id="monthlyReportCard">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h3 style="margin:0; font-size:1.1rem">التقرير الشهري</h3>
-                    <select id="yearFilter" onchange="window.renderDashboardReports()" style="padding:8px; border-radius:8px; border:1px solid #ddd;"></select>
+                    <h3 style="margin:0">التقرير الشهري المفصل</h3>
+                    <select id="yearFilter" onchange="window.renderDashboardReports()" style="padding:8px; border-radius:5px; border:1px solid #ddd;"></select>
                 </div>
                 <div id="monthlyReportContainer"></div>
             </div>
@@ -231,7 +274,7 @@
                 <form id="studentForm" style="display:none; margin-top:20px;" onsubmit="window.addStudent(event)">
                     <div class="form-group"><label>الاسم الكامل</label><input type="text" id="sName" required></div>
                     <div class="form-row">
-                        <div class="form-group"><label>تاريخ الازدياد</label><input type="date" id="sDob" required></div>
+                        <div class="form-group"><label>تاريخ الازدياد <span id="ageDisplay" style="color:var(--accent-color)"></span></label><input type="date" id="sDob" required onchange="window.calcAge(this.value)"></div>
                         <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="sPhone" required></div>
                     </div>
                     <div class="form-group"><label>رقم البطاقة الوطنية</label><input type="text" id="sCNIE"></div>
@@ -246,16 +289,16 @@
                     <div class="form-group"><label>مواد الحلاقة</label><input type="number" id="sMatFee"></div>
                     <div class="form-row">
                         <div class="form-group"><label>مبلغ المعدات</label><input type="number" id="sEquipFee"></div>
-                        <div class="form-group"><label>تقسيط المعدات (أشهر)</label><input type="number" id="sEquipDuration" value="1"></div>
+                        <div class="form-group"><label>تقسيط المعدات</label><input type="number" id="sEquipDuration" value="1"></div>
                     </div>
-                    <div class="form-group"><label>لوازم التسجيل</label><div id="suppliesChecklist" class="supplies-list"></div></div>
+                    <div class="form-group"><label>لوازم التسجيل</label><div id="suppliesChecklist"></div></div>
                     <div class="form-group"><label style="color:var(--success-color)">تسبيق (اختياري)</label><input type="number" id="sInitialPay"></div>
-                    <button type="submit" class="btn-primary">حفظ البيانات</button>
+                    <button type="submit" class="btn-primary">حفظ</button>
                 </form>
             </div>
-            <input type="text" id="searchBox" placeholder="بحث بالاسم أو الهاتف..." onkeyup="window.renderStudents()" style="width:100%; padding:12px; margin-top:10px; border-radius:25px; border:1px solid #ccc; text-align:center;">
+            <input type="text" id="searchBox" placeholder="بحث..." onkeyup="window.renderStudents()" style="width:100%; padding:12px; margin-top:10px; border-radius:25px; border:1px solid #ccc; text-align:center;">
             <div class="card table-responsive" style="margin-top:15px; padding:0; overflow:hidden;">
-                <table id="studentsTable" style="margin:0;"><thead><tr style="background:#f1f1f1"><th>الاسم</th><th>التقدم</th><th>إجراء</th></tr></thead><tbody></tbody></table>
+                <table id="studentsTable" style="margin:0;"><thead><tr style="background:#f9f9f9"><th>الاسم</th><th>التقدم</th><th>إجراء</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
 
@@ -279,7 +322,7 @@
         <div id="settings" class="section">
             <div class="card">
                 <h3>الإعدادات</h3>
-                <div class="form-group"><label>قسط التدريب الشهري</label><input type="number" id="defTrainFee" onchange="window.saveSettings()"></div>
+                <div class="form-group"><label>قسط التدريب الشهري الافتراضي</label><input type="number" id="defTrainFee" onchange="window.saveSettings()"></div>
                 <hr>
                 <h4>إدارة لوازم التسجيل</h4>
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
@@ -294,16 +337,24 @@
 
     </div>
 
-    <!-- القائمة السفلية -->
+    <!-- القائمة السفلية / الجانبية -->
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="window.navTo('home', this)"><i class="fas fa-home"></i> الرئيسية</button>
-        <button class="nav-item" onclick="window.navTo('students', this)"><i class="fas fa-user-graduate"></i> المتدربون</button>
-        <button class="nav-item" onclick="window.navTo('expenses', this)"><i class="fas fa-wallet"></i> المصاريف</button>
-        <button class="nav-item" onclick="window.navTo('settings', this)"><i class="fas fa-cog"></i> الإعدادات</button>
+        <button class="nav-item active" onclick="window.navTo('home', this)">
+            <i class="fas fa-home"></i><span>الرئيسية</span>
+        </button>
+        <button class="nav-item" onclick="window.navTo('students', this)">
+            <i class="fas fa-users"></i><span>المتدربون</span>
+        </button>
+        <button class="nav-item" onclick="window.navTo('expenses', this)">
+            <i class="fas fa-wallet"></i><span>المصاريف</span>
+        </button>
+        <button class="nav-item" onclick="window.navTo('settings', this)">
+            <i class="fas fa-cog"></i><span>الإعدادات</span>
+        </button>
     </div>
 
     <!-- نافذة تفاصيل الرصيد -->
-    <div id="balanceModal" class="modal modal-small">
+    <div id="balanceModal" class="modal">
         <div class="modal-content" style="text-align:center;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3 style="margin:0; color:var(--primary-color)">تفاصيل الرصيد</h3>
@@ -377,6 +428,10 @@
             if(document.getElementById('sRegDate')) document.getElementById('sRegDate').value = today;
             if(document.getElementById('exDate')) document.getElementById('exDate').value = today;
 
+            // Load Mode Preference
+            const savedMode = localStorage.getItem('viewMode');
+            if(savedMode === 'desktop') window.setMode('desktop');
+
             db.collection("settings").doc("config").onSnapshot(doc => {
                 if(doc.exists) { appSettings = doc.data(); window.updateSettingsUI(); }
                 else db.collection("settings").doc("config").set(appSettings);
@@ -387,8 +442,8 @@
                 document.getElementById('loading-overlay').style.display = 'none';
                 window.renderStudents();
                 window.updateDashboard();
-                if(currentStudentId && document.getElementById('paymentModal').classList.contains('show')) window.openPayModal(currentStudentId);
-                if(currentStudentId && document.getElementById('profileModal').classList.contains('show')) window.openProfile(currentStudentId);
+                if(currentStudentId && document.getElementById('paymentModal').style.display === 'flex') window.openPayModal(currentStudentId);
+                if(currentStudentId && document.getElementById('profileModal').style.display === 'flex') window.openProfile(currentStudentId);
             });
 
             db.collection("expenses").onSnapshot(snap => {
@@ -397,6 +452,20 @@
                 window.updateDashboard();
             });
         };
+
+        // --- View Mode Logic ---
+        window.setMode = function(mode) {
+            if(mode === 'desktop') {
+                document.body.classList.add('desktop-mode');
+                document.getElementById('btnDesktop').classList.add('active');
+                document.getElementById('btnMobile').classList.remove('active');
+            } else {
+                document.body.classList.remove('desktop-mode');
+                document.getElementById('btnMobile').classList.add('active');
+                document.getElementById('btnDesktop').classList.remove('active');
+            }
+            localStorage.setItem('viewMode', mode);
+        }
 
         // --- Navigation ---
         window.navTo = function(id, btn) {
@@ -418,6 +487,12 @@
             } else { el.style.display = 'none'; }
         }
 
+        window.calcAge = function(val) {
+            if(!val) return;
+            const age = Math.abs(new Date(Date.now() - new Date(val).getTime()).getUTCFullYear() - 1970);
+            document.getElementById('ageDisplay').innerText = `(${age} سنة)`;
+        }
+
         // --- Core Functions ---
         window.addStudent = function(e) {
             e.preventDefault();
@@ -427,6 +502,7 @@
             const cnie = document.getElementById('sCNIE').value;
             const regDate = document.getElementById('sRegDate').value;
             const duration = parseInt(document.getElementById('sDuration').value) || 9;
+            
             const regFee = parseFloat(document.getElementById('sRegFee').value) || 0;
             const trainFee = parseFloat(document.getElementById('sTrainFee').value) || 0;
             const matFee = parseFloat(document.getElementById('sMatFee').value) || 0;
@@ -530,11 +606,15 @@
                 s.supplies.forEach((sup, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'supply-checkbox-item';
+                    itemDiv.style.background = sup.checked ? '#d4edda' : '#f8d7da';
                     itemDiv.innerHTML = `<span style="flex-grow:1">${sup.name}</span><input type="checkbox" ${sup.checked ? 'checked' : ''} onchange="window.toggleSupply('${s.id}', ${index}, this.checked)">`;
                     suppliesListDiv.appendChild(itemDiv);
                 });
             }
-            showModal('profileModal');
+            // Use flex instead of show class for custom logic
+            const m = document.getElementById('profileModal');
+            m.style.display = 'flex';
+            setTimeout(() => m.style.opacity = 1, 10);
         }
 
         window.toggleSupply = function(studentId, supplyIndex, isChecked) {
@@ -573,10 +653,10 @@
                 } else if (p.paid > 0) { 
                     rowClass = 'background-color: #fff3cd'; 
                     statusText = `باقي: ${Math.round(remaining)}`;
-                    actionBtn = `<button class="btn-primary" style="background:#d35400; padding:5px 10px; font-size:0.8rem; width:auto" onclick="window.processPayment('${s.id}', ${idx})">الباقي: ${Math.round(remaining)}</button>`;
+                    actionBtn = `<button class="btn-primary" style="background:#d35400; font-size:0.8rem; padding:5px" onclick="window.processPayment('${s.id}', ${idx})">الباقي: ${Math.round(remaining)}</button>`;
                 } else {
                     statusText = 'غير مدفوع';
-                    actionBtn = `<button class="btn-primary" style="padding:5px 10px; font-size:0.8rem; width:auto" onclick="window.processPayment('${s.id}', ${idx})">استخلاص</button>`;
+                    actionBtn = `<button class="btn-primary" style="font-size:0.8rem; padding:5px" onclick="window.processPayment('${s.id}', ${idx})">استخلاص</button>`;
                 }
 
                 tbody.innerHTML += `
@@ -588,7 +668,9 @@
                     </tr>
                 `;
             });
-            showModal('paymentModal');
+            const m = document.getElementById('paymentModal');
+            m.style.display = 'flex';
+            setTimeout(() => m.style.opacity = 1, 10);
         }
 
         window.processPayment = function(studentId, idx) {
@@ -607,7 +689,7 @@
         }
 
         window.cancelPayment = function(studentId, idx) {
-            if(confirm("إلغاء هذا الدفع؟")) {
+            if(confirm("إلغاء الدفع؟")) {
                 const s = allStudents.find(x => x.id === studentId);
                 s.payments[idx].paid = 0;
                 db.collection("students").doc(studentId).update({ payments: s.payments });
@@ -679,7 +761,15 @@
             document.getElementById('modalTotalExpenses').innerText = Math.round(exp) + ' درهم';
             document.getElementById('modalNetBalance').innerText = Math.round(inc - exp) + ' درهم';
             
-            showModal('balanceModal');
+            const m = document.getElementById('balanceModal');
+            m.style.display = 'flex';
+            setTimeout(() => m.style.opacity = 1, 10);
+        }
+
+        window.closeModal = function(id) {
+            const m = document.getElementById(id);
+            m.style.opacity = 0;
+            setTimeout(() => m.style.display = 'none', 300);
         }
 
         window.updateDashboard = function() {
@@ -698,17 +788,7 @@
                     currentMonthExp += e.amount;
                 }
             });
-            const statsGrid = document.querySelector('.stats-grid');
-            if(!document.getElementById('currentMonthExpBox')) {
-                const div = document.createElement('div');
-                div.className = 'stat-box';
-                div.id = 'currentMonthExpBox';
-                div.style.gridColumn = "span 2";
-                div.innerHTML = `<h4>مصاريف هذا الشهر</h4><p style="color:var(--danger-color)">${Math.round(currentMonthExp)}</p>`;
-                statsGrid.appendChild(div);
-            } else {
-                document.querySelector('#currentMonthExpBox p').innerText = Math.round(currentMonthExp);
-            }
+            document.getElementById('currentMonthExpenses').innerText = Math.round(currentMonthExp);
 
             const missingTbody = document.querySelector('#missingTable tbody');
             const overdueTbody = document.querySelector('#overdueTable tbody');
@@ -818,16 +898,6 @@
             });
             html += '</ul>';
             container.innerHTML = html;
-        }
-
-        // --- Helpers for Modal ---
-        window.showModal = function(id) {
-            const m = document.getElementById(id);
-            m.classList.add('show');
-        }
-        window.closeModal = function(id) {
-            const m = document.getElementById(id);
-            m.classList.remove('show');
         }
 
     </script>
