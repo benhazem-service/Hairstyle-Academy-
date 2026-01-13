@@ -6,7 +6,7 @@
     <title>تطبيق جمعية الحلاقة - المطور</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Firebase SDK (Compat Version 8.10.1 - الأكثر استقراراً للملفات المدمجة) -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
@@ -17,7 +17,6 @@
             --success-color: #27ae60;
             --danger-color: #c0392b;
             --warning-color: #f39c12;
-            --partial-color: #d35400;
             --bg-color: #f4f6f7;
             --card-bg: #ffffff;
             --text-color: #333;
@@ -50,6 +49,7 @@
         .card {
             background: var(--card-bg); border-radius: 12px; padding: 15px;
             margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            border: 1px solid #eee;
         }
 
         /* --- Forms --- */
@@ -72,16 +72,8 @@
         th, td { text-align: right; padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
         th { color: #777; font-weight: 600; white-space: nowrap; }
         .clickable-name { font-weight: bold; color: var(--primary-color); border-bottom: 1px dashed #ccc; cursor: pointer; }
-
-        /* --- Badges & Lists --- */
-        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: bold; display: inline-block; min-width: 50px; text-align: center; }
-        .badge-paid { background: #d4edda; color: #155724; }
-        .badge-partial { background: #fff3cd; color: #856404; }
-        .badge-due { background: #f8d7da; color: #721c24; }
-
-        .supplies-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 5px; }
-        .supply-item { background: #f0f2f5; padding: 8px 12px; border-radius: 20px; border: 1px solid #ddd; display: flex; align-items: center; font-size: 0.85rem; }
-        .supply-item input { margin-left: 8px; width: auto; }
+        tr.clickable-row { cursor: pointer; transition: background 0.2s; }
+        tr.clickable-row:hover { background-color: #f9f9f9; }
 
         /* --- Navigation --- */
         .bottom-nav {
@@ -95,12 +87,37 @@
 
         /* --- Stats --- */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-box { background: white; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
+        .stat-box { background: white; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #eee; cursor: pointer; }
+        .stat-box:active { background: #f9f9f9; }
         .stat-box p { margin: 5px 0 0; font-size: 1.2rem; font-weight: bold; color: var(--primary-color); }
+        .stat-box h4 { margin: 0; font-size: 0.9rem; color: #7f8c8d; }
+
+        /* --- Detailed Report --- */
+        .report-list { list-style: none; padding: 0; margin: 0; }
+        .report-item { border-bottom: 1px solid #eee; margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #eee; }
+        .report-header { padding: 15px; display: flex; justify-content: space-between; cursor: pointer; background: #f8f9fa; font-weight: bold; }
+        .report-header:hover { background: #f1f1f1; }
+        .report-details { display: none; padding: 10px; background: #fff; animation: fadeIn 0.3s; }
+        .report-details.show { display: block; }
+        
+        .detail-block { margin-bottom: 15px; }
+        .detail-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 2px solid #eee; display: flex; justify-content: space-between; }
+        .inc-title { color: var(--success-color); border-color: var(--success-color); }
+        .exp-title { color: var(--danger-color); border-color: var(--danger-color); }
+        
+        .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f9f9f9; font-size: 0.85rem; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-name { color: #555; }
+        .detail-amount { font-weight: bold; }
+
+        /* --- Checkbox List --- */
+        .supply-checkbox-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
+        .supply-checkbox-item input { width: 20px; height: 20px; margin-left: 10px; }
 
         /* --- Modals --- */
         .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: flex-end; }
         .modal-content { background: white; width: 100%; height: 90vh; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .modal-small .modal-content { height: auto; border-radius: 12px; width: 90%; margin: auto; top: 50%; transform: translateY(-50%); position: relative; }
 
         /* --- Loading --- */
         #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; }
@@ -113,7 +130,7 @@
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p style="margin-top:15px">جاري الاتصال بقاعدة البيانات...</p>
+        <p style="margin-top:15px">جاري الاتصال...</p>
     </div>
 
     <div class="mobile-header">
@@ -124,119 +141,82 @@
         
         <!-- صفحة الرئيسية -->
         <div id="home" class="section active">
-            <div class="card" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; text-align: center;">
-                <p style="margin:0; opacity:0.8">الرصيد الصافي</p>
+            <!-- الرصيد الصافي -->
+            <div class="card" onclick="window.showBalanceDetails()" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; text-align: center; cursor: pointer;">
+                <p style="margin:0; opacity:0.8">الرصيد الصافي (اضغط للتفاصيل)</p>
                 <h1 id="netBalance" style="margin:5px 0">0</h1>
                 <p style="margin:0">درهم</p>
             </div>
 
             <div class="stats-grid">
-                <div class="stat-box" onclick="navTo('students', document.querySelectorAll('.nav-item')[1])">
+                <div class="stat-box" onclick="window.navTo('students', document.querySelectorAll('.nav-item')[1])">
                     <h4>المتدربين</h4><p id="totalStudents">0</p>
                 </div>
-                <div class="stat-box">
-                    <h4>المداخيل</h4><p id="totalIncome" style="color:green">0</p>
+                <div class="stat-box" onclick="document.getElementById('monthlyReportCard').scrollIntoView({behavior: 'smooth'})">
+                    <h4>المداخيل الكلية</h4><p id="totalIncome" style="color:green">0</p>
+                </div>
+                <!-- خانة مصاريف الشهر الجديد (تم تعديلها لتظهر مرة واحدة فقط) -->
+                <div class="stat-box" style="grid-column: span 2;">
+                    <h4>مصاريف هذا الشهر</h4><p id="currentMonthExpenses" style="color:var(--danger-color)">0</p>
                 </div>
             </div>
 
+            <!-- الجداول -->
             <div class="card" style="border-right: 4px solid var(--danger-color);">
-                <h3><i class="fas fa-file-excel"></i> نواقص لوازم التسجيل</h3>
-                <div class="table-responsive"><table id="missingTable"><tbody></tbody></table></div>
+                <h3 style="color:var(--danger-color)"><i class="fas fa-exclamation-circle"></i> متأخرات الدفع (واجبة)</h3>
+                <div class="table-responsive"><table id="overdueTable"><tbody></tbody></table></div>
             </div>
 
             <div class="card" style="border-right: 4px solid var(--warning-color);">
-                <h3><i class="fas fa-clock"></i> استحقاقات قريبة/متأخرة</h3>
-                <div class="table-responsive"><table id="overdueTable"><tbody></tbody></table></div>
+                <h3 style="color:var(--warning-color)"><i class="fas fa-clock"></i> استحقاق قريب (3 أيام)</h3>
+                <div class="table-responsive"><table id="upcomingTable"><tbody></tbody></table></div>
+            </div>
+
+            <div class="card" style="border-right: 4px solid #3498db;">
+                <h3 style="color:#3498db"><i class="fas fa-file-contract"></i> نواقص ملفات التسجيل</h3>
+                <div class="table-responsive"><table id="missingTable"><tbody></tbody></table></div>
+            </div>
+
+            <!-- التقرير الشهري المفصل -->
+            <div class="card" id="monthlyReportCard">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h3>التقرير الشهري المفصل</h3>
+                    <select id="yearFilter" onchange="window.renderDashboardReports()" style="padding:5px; width:80px"></select>
+                </div>
+                <div id="monthlyReportContainer"></div>
             </div>
         </div>
 
         <!-- صفحة المتدربين -->
         <div id="students" class="section">
             <div class="card">
-                <button class="btn-primary" onclick="toggleForm('studentForm')"><i class="fas fa-plus"></i> إضافة متدرب جديد</button>
-                
-                <form id="studentForm" style="display:none; margin-top:20px;" onsubmit="addStudent(event)">
-                    
-                    <h4 style="color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px;">1. المعلومات الشخصية</h4>
-                    <div class="form-group">
-                        <label>الاسم الكامل</label>
-                        <input type="text" id="sName" required>
+                <button class="btn-primary" onclick="window.toggleForm('studentForm')"><i class="fas fa-plus"></i> إضافة متدرب جديد</button>
+                <form id="studentForm" style="display:none; margin-top:20px;" onsubmit="window.addStudent(event)">
+                    <div class="form-group"><label>الاسم الكامل</label><input type="text" id="sName" required></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>تاريخ الازدياد</label><input type="date" id="sDob" required></div>
+                        <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="sPhone" required></div>
+                    </div>
+                    <div class="form-group"><label>رقم البطاقة الوطنية</label><input type="text" id="sCNIE"></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>تاريخ التسجيل</label><input type="date" id="sRegDate" required></div>
+                        <div class="form-group"><label>مدة التدريب (أشهر)</label><input type="number" id="sDuration" value="9" required></div>
                     </div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>تاريخ الازدياد <span id="ageDisplay" style="color:var(--accent-color); font-size:0.8em"></span></label>
-                            <input type="date" id="sDob" required onchange="calcAge(this.value)">
-                        </div>
-                        <div class="form-group">
-                            <label>رقم الهاتف</label>
-                            <input type="tel" id="sPhone" required>
-                        </div>
+                        <div class="form-group"><label>رسوم التسجيل</label><input type="number" id="sRegFee" placeholder="درهم"></div>
+                        <div class="form-group"><label>قسط التدريب</label><input type="number" id="sTrainFee" placeholder="درهم"></div>
                     </div>
-                    <div class="form-group">
-                        <label>رقم البطاقة الوطنية (CINE)</label>
-                        <input type="text" id="sCNIE">
-                    </div>
-
-                    <h4 style="color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">2. بيانات التسجيل والتدريب</h4>
+                    <div class="form-group"><label>مواد الحلاقة</label><input type="number" id="sMatFee"></div>
                     <div class="form-row">
-                        <div class="form-group">
-                            <label>تاريخ التسجيل</label>
-                            <input type="date" id="sRegDate" required>
-                        </div>
-                        <div class="form-group">
-                            <label>مدة التدريب (أشهر)</label>
-                            <input type="number" id="sDuration" value="9" required>
-                        </div>
+                        <div class="form-group"><label>مبلغ المعدات</label><input type="number" id="sEquipFee"></div>
+                        <div class="form-group"><label>تقسيط المعدات</label><input type="number" id="sEquipDuration" value="1"></div>
                     </div>
-
-                    <h4 style="color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">3. الرسوم والأقساط</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>رسوم التسجيل</label>
-                            <input type="number" id="sRegFee" placeholder="أدخل المبلغ">
-                        </div>
-                        <div class="form-group">
-                            <label>قسط التدريب الشهري</label>
-                            <input type="number" id="sTrainFee" placeholder="أدخل المبلغ">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>مبلغ مواد الحلاقة</label>
-                        <input type="number" id="sMatFee" placeholder="0 إذا لا يوجد">
-                    </div>
-                    
-                    <div style="background:#f9f9f9; padding:10px; border-radius:8px; border:1px solid #eee;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>مبلغ معدات الحلاقة</label>
-                                <input type="number" id="sEquipFee" placeholder="0 إذا لا يوجد">
-                            </div>
-                            <div class="form-group">
-                                <label>مدة تقسيط المعدات (أشهر)</label>
-                                <input type="number" id="sEquipDuration" value="1" min="1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <h4 style="color:var(--primary-color); border-bottom:1px solid #eee; padding-bottom:5px; margin-top:15px;">4. اللوازم والدفع</h4>
-                    <div class="form-group">
-                        <label>لوازم التسجيل المقدمة:</label>
-                        <div id="suppliesChecklist" class="supplies-list"></div>
-                    </div>
-
-                    <div class="form-group" style="background:#e8f6f3; padding:10px; border-radius:8px; border:1px dashed var(--success-color);">
-                        <label style="color:var(--success-color)">المبلغ المدفوع الآن (تسبيق)</label>
-                        <input type="number" id="sInitialPay" placeholder="0">
-                    </div>
-
-                    <button type="submit" class="btn-primary" style="margin-top:10px">حفظ البيانات</button>
+                    <div class="form-group"><label>لوازم التسجيل</label><div id="suppliesChecklist"></div></div>
+                    <div class="form-group"><label>تسبيق</label><input type="number" id="sInitialPay"></div>
+                    <button type="submit" class="btn-primary">حفظ</button>
                 </form>
             </div>
-
-            <div style="margin-top:15px">
-                <input type="text" id="searchBox" placeholder="بحث بالاسم أو الهاتف..." onkeyup="renderStudents()" style="width:100%; padding:10px; border-radius:20px; border:1px solid #ccc;">
-            </div>
-
+            <input type="text" id="searchBox" placeholder="بحث..." onkeyup="window.renderStudents()" style="width:100%; padding:10px; margin-top:10px; border-radius:20px; border:1px solid #ccc;">
             <div class="card table-responsive" style="margin-top:10px">
                 <table id="studentsTable"><thead><tr><th>الاسم</th><th>التقدم</th><th></th></tr></thead><tbody></tbody></table>
             </div>
@@ -246,7 +226,7 @@
         <div id="expenses" class="section">
             <div class="card">
                 <h3>إضافة مصروف</h3>
-                <form onsubmit="addExpense(event)">
+                <form onsubmit="window.addExpense(event)">
                     <div class="form-row">
                         <div class="form-group"><input type="text" id="exDesc" placeholder="البيان" required></div>
                         <div class="form-group"><input type="number" id="exAmount" placeholder="المبلغ" required></div>
@@ -255,30 +235,23 @@
                     <button type="submit" class="btn-primary">تسجيل</button>
                 </form>
             </div>
-            <div class="card table-responsive">
-                <table id="expensesTable"><tbody></tbody></table>
-            </div>
+            <div class="card table-responsive"><table id="expensesTable"><tbody></tbody></table></div>
         </div>
 
         <!-- الإعدادات -->
         <div id="settings" class="section">
             <div class="card">
                 <h3>الإعدادات</h3>
-                <div class="form-group">
-                    <label>قسط التدريب الشهري الافتراضي</label>
-                    <input type="number" id="defTrainFee" onchange="saveSettings()">
-                </div>
-                
+                <div class="form-group"><label>قسط التدريب الشهري</label><input type="number" id="defTrainFee" onchange="window.saveSettings()"></div>
                 <hr>
                 <h4>إدارة لوازم التسجيل</h4>
                 <div style="display:flex; gap:10px; margin-bottom:10px;">
-                    <input type="text" id="newSupply" placeholder="اسم اللازمة (مثلا: صورتان)">
-                    <button class="btn-primary" style="width:auto" onclick="addSupplyItem()">+</button>
+                    <input type="text" id="newSupply" placeholder="اسم اللازمة">
+                    <button class="btn-primary" style="width:auto" onclick="window.addSupplyItem()">+</button>
                 </div>
                 <ul id="settingsSupplies" style="list-style:none; padding:0"></ul>
-                
                 <hr>
-                <button class="btn-primary" style="background:var(--danger-color)" onclick="clearAllData()">تهيئة المصنع (حذف الكل)</button>
+                <button class="btn-primary" style="background:var(--danger-color)" onclick="window.clearAllData()">تهيئة المصنع</button>
             </div>
         </div>
 
@@ -286,22 +259,48 @@
 
     <!-- القائمة السفلية -->
     <div class="bottom-nav">
-        <button class="nav-item active" onclick="navTo('home', this)"><i class="fas fa-home"></i> الرئيسية</button>
-        <button class="nav-item" onclick="navTo('students', this)"><i class="fas fa-user-graduate"></i> المتدربون</button>
-        <button class="nav-item" onclick="navTo('expenses', this)"><i class="fas fa-wallet"></i> المصاريف</button>
-        <button class="nav-item" onclick="navTo('settings', this)"><i class="fas fa-cog"></i> الإعدادات</button>
+        <button class="nav-item active" onclick="window.navTo('home', this)"><i class="fas fa-home"></i> الرئيسية</button>
+        <button class="nav-item" onclick="window.navTo('students', this)"><i class="fas fa-user-graduate"></i> المتدربون</button>
+        <button class="nav-item" onclick="window.navTo('expenses', this)"><i class="fas fa-wallet"></i> المصاريف</button>
+        <button class="nav-item" onclick="window.navTo('settings', this)"><i class="fas fa-cog"></i> الإعدادات</button>
     </div>
 
-    <!-- النوافذ المنبثقة -->
+    <!-- نافذة تفاصيل الرصيد -->
+    <div id="balanceModal" class="modal modal-small">
+        <div class="modal-content" style="text-align:center;">
+            <span onclick="document.getElementById('balanceModal').style.display='none'" style="float:left; font-size:24px; cursor:pointer">&times;</span>
+            <h3 style="color:var(--primary-color)">تفاصيل الرصيد</h3>
+            <div style="margin:20px 0; font-size:1.1rem;">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:10px;">
+                    <span>مجموع المداخيل:</span>
+                    <span style="color:var(--success-color)" id="modalTotalIncome">0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:10px;">
+                    <span>مجموع المصاريف:</span>
+                    <span style="color:var(--danger-color)" id="modalTotalExpenses">0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; padding:10px; font-weight:bold; background:#f9f9f9; margin-top:10px; border-radius:8px;">
+                    <span>الرصيد الصافي:</span>
+                    <span style="color:var(--primary-color)" id="modalNetBalance">0</span>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="document.getElementById('balanceModal').style.display='none'">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- نافذة البروفايل -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
             <span onclick="document.getElementById('profileModal').style.display='none'" style="float:left; font-size:24px; cursor:pointer">&times;</span>
             <h3 style="margin-top:0">ملف المتدرب</h3>
             <div id="profileContent"></div>
-            <button class="btn-primary" style="margin-top:15px" onclick="goToPayFromProfile()">سجل الأداءات</button>
+            <h4 style="margin-bottom:5px">لوازم التسجيل (اضغط لتعديل الحالة):</h4>
+            <div id="profileSuppliesList"></div>
+            <button class="btn-primary" style="margin-top:15px" onclick="window.goToPayFromProfile()">سجل الأداءات</button>
         </div>
     </div>
 
+    <!-- نافذة الأداءات -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
             <span onclick="document.getElementById('paymentModal').style.display='none'" style="float:left; font-size:24px; cursor:pointer">&times;</span>
@@ -313,7 +312,7 @@
     </div>
 
     <script>
-        // --- تهيئة Firebase بإعداداتك ---
+        // --- Firebase Init ---
         const firebaseConfig = {
             apiKey: "AIzaSyB5a4zFSlo_Td4wto1_HCNeb7CpI4AzJkM",
             authDomain: "hila9a-64416.firebaseapp.com",
@@ -324,50 +323,32 @@
             measurementId: "G-HNVEL5XJJP"
         };
 
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        db.enablePersistence().catch(err => console.log("Persistence error:", err));
+        db.enablePersistence().catch(err => console.log(err));
 
-        // --- المتغيرات العامة ---
-        let allStudents = [];
-        let allExpenses = [];
-        let appSettings = { trainFee: 300, supplies: ['صورة شمسية', 'نسخة بطاقة التعريف'] };
-        let currentStudentId = null;
-
+        let allStudents = [], allExpenses = [], appSettings = { trainFee: 300, supplies: ['صورة'] }, currentStudentId = null;
         const arabicMonths = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "غشت", "شتنبر", "أكتوبر", "نونبر", "دجنبر"];
 
-        // --- تحميل البيانات ---
         window.onload = function() {
             const today = new Date().toISOString().split('T')[0];
             if(document.getElementById('sRegDate')) document.getElementById('sRegDate').value = today;
             if(document.getElementById('exDate')) document.getElementById('exDate').value = today;
 
-            // Settings Listener
             db.collection("settings").doc("config").onSnapshot(doc => {
-                if(doc.exists) {
-                    appSettings = doc.data();
-                    window.updateSettingsUI();
-                } else {
-                    db.collection("settings").doc("config").set(appSettings);
-                }
+                if(doc.exists) { appSettings = doc.data(); window.updateSettingsUI(); }
+                else db.collection("settings").doc("config").set(appSettings);
             });
 
-            // Students Listener
             db.collection("students").onSnapshot(snap => {
                 allStudents = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 document.getElementById('loading-overlay').style.display = 'none';
                 window.renderStudents();
                 window.updateDashboard();
-                if(currentStudentId && document.getElementById('paymentModal').style.display === 'flex') {
-                    // إعادة تحميل النافذة لتحديث الألوان والأرقام
-                    window.openPayModal(currentStudentId);
-                }
+                if(currentStudentId && document.getElementById('paymentModal').style.display === 'flex') window.openPayModal(currentStudentId);
+                if(currentStudentId && document.getElementById('profileModal').style.display === 'flex') window.openProfile(currentStudentId);
             });
 
-            // Expenses Listener
             db.collection("expenses").onSnapshot(snap => {
                 allExpenses = snap.docs.map(d => ({id: d.id, ...d.data()}));
                 window.renderExpenses();
@@ -375,7 +356,7 @@
             });
         };
 
-        // --- الدوال العامة ---
+        // --- Navigation ---
         window.navTo = function(id, btn) {
             document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
@@ -390,20 +371,12 @@
                 const container = document.getElementById('suppliesChecklist');
                 container.innerHTML = '';
                 (appSettings.supplies || []).forEach(s => {
-                    container.innerHTML += `<label class="supply-item"><input type="checkbox" value="${s}"> ${s}</label>`;
+                    container.innerHTML += `<label class="supply-checkbox-item"><input type="checkbox" value="${s}"> ${s}</label>`;
                 });
-            } else {
-                el.style.display = 'none';
-            }
+            } else { el.style.display = 'none'; }
         }
 
-        window.calcAge = function(val) {
-            if(!val) return;
-            const age = Math.abs(new Date(Date.now() - new Date(val).getTime()).getUTCFullYear() - 1970);
-            document.getElementById('ageDisplay').innerText = `(${age} سنة)`;
-        }
-
-        // --- إضافة متدرب ---
+        // --- Core Functions ---
         window.addStudent = function(e) {
             e.preventDefault();
             const name = document.getElementById('sName').value;
@@ -431,16 +404,14 @@
 
             const d = new Date(regDate);
             for(let i=0; i<duration; i++) {
-                const dueDate = new Date(d);
-                dueDate.setMonth(d.getMonth() + i);
+                const dueDate = new Date(d); dueDate.setMonth(d.getMonth() + i);
                 payments.push({ type: 'train', label: `تدريب شهر ${i+1}`, amount: trainFee, paid: 0, due: dueDate.toISOString() });
             }
 
             if(equipFee > 0) {
                 const monthlyEquip = equipFee / equipDuration;
                 for(let i=0; i<equipDuration; i++) {
-                    const dueDate = new Date(d);
-                    dueDate.setMonth(d.getMonth() + i);
+                    const dueDate = new Date(d); dueDate.setMonth(d.getMonth() + i);
                     payments.push({ type: 'equip', label: `معدات قسط ${i+1}/${equipDuration}`, amount: monthlyEquip, paid: 0, due: dueDate.toISOString() });
                 }
             }
@@ -448,21 +419,17 @@
             if(initPay > 0) {
                 for(let p of payments) {
                     if(initPay <= 0.1) break;
-                    let remaining = p.amount - p.paid;
-                    let toPay = Math.min(remaining, initPay);
-                    p.paid += toPay;
-                    initPay -= toPay;
+                    let rem = p.amount - p.paid;
+                    let pay = Math.min(rem, initPay);
+                    p.paid += pay;
+                    initPay -= pay;
                 }
             }
 
             db.collection("students").add({
-                name, dob, phone, cnie, regDate,
-                trainFee, duration, equipFee, equipDuration,
-                supplies, payments
+                name, dob, phone, cnie, regDate, trainFee, duration, equipFee, equipDuration, supplies, payments
             }).then(() => {
-                e.target.reset();
-                window.toggleForm('studentForm');
-                alert("تمت إضافة المتدرب");
+                e.target.reset(); window.toggleForm('studentForm'); alert("تمت الإضافة");
             }).catch(err => alert("خطأ: " + err.message));
         }
 
@@ -483,11 +450,10 @@
                             <td><div style="font-size:0.7em">${paidCount}/${trainParams.length} أشهر</div>
                             <div style="height:5px; background:#eee; width:100%"><div style="height:100%; background:green; width:${percent}%"></div></div></td>
                             <td>
-                                <button class="btn-primary" style="padding:5px 10px; font-size:0.8rem; width:auto" onclick="window.openPayModal('${s.id}')">أداء</button>
-                                <button class="btn-primary" style="padding:5px 10px; font-size:0.8rem; width:auto; background:red; margin-right:5px" onclick="window.deleteStudent('${s.id}')">حذف</button>
+                                <button class="btn-primary" style="padding:5px 10px; width:auto" onclick="window.openPayModal('${s.id}')">أداء</button>
+                                <button class="btn-primary" style="padding:5px 10px; width:auto; background:red; margin-right:5px" onclick="window.deleteStudent('${s.id}')">حذف</button>
                             </td>
-                        </tr>
-                    `;
+                        </tr>`;
                 }
             });
         }
@@ -496,6 +462,7 @@
             if(confirm("حذف نهائي؟")) db.collection("students").doc(id).delete();
         }
 
+        // --- Profile ---
         window.openProfile = function(id) {
             currentStudentId = id;
             const s = allStudents.find(x => x.id === id);
@@ -505,28 +472,35 @@
             let totalReq = 0, totalPaid = 0;
             s.payments.forEach(p => { totalReq += p.amount; totalPaid += p.paid; });
 
-            let suppliesHtml = '<div><strong>اللوازم:</strong><br>';
-            if(s.supplies) {
-                s.supplies.forEach(sup => {
-                    suppliesHtml += sup.checked 
-                        ? `<span class="badge" style="background:#d4edda; color:#155724; margin:2px">✔ ${sup.name}</span>` 
-                        : `<span class="badge" style="background:#f8d7da; color:#721c24; margin:2px">✖ ${sup.name}</span>`;
-                });
-            }
-            suppliesHtml += '</div>';
-
             document.getElementById('profileContent').innerHTML = `
                 <p><strong>الاسم:</strong> ${s.name}</p>
                 <p><strong>الهاتف:</strong> ${s.phone}</p>
                 <p><strong>السن:</strong> ${age} سنة</p>
-                <p><strong>البطاقة:</strong> ${s.cnie || '-'}</p>
+                <p><strong>تاريخ التسجيل:</strong> ${s.regDate}</p>
                 <div style="background:#f9f9f9; padding:10px; border-radius:5px; margin:10px 0;">
                     <p><strong>المدفوع:</strong> <span style="color:green">${Math.round(totalPaid)}</span></p>
                     <p><strong>المتبقي:</strong> <span style="color:red">${Math.round(totalReq - totalPaid)}</span></p>
                 </div>
-                ${suppliesHtml}
             `;
+
+            const suppliesListDiv = document.getElementById('profileSuppliesList');
+            suppliesListDiv.innerHTML = '';
+            if(s.supplies) {
+                s.supplies.forEach((sup, index) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'supply-checkbox-item';
+                    itemDiv.style.background = sup.checked ? '#d4edda' : '#f8d7da';
+                    itemDiv.innerHTML = `<span style="flex-grow:1">${sup.name}</span><input type="checkbox" ${sup.checked ? 'checked' : ''} onchange="window.toggleSupply('${s.id}', ${index}, this.checked)">`;
+                    suppliesListDiv.appendChild(itemDiv);
+                });
+            }
             document.getElementById('profileModal').style.display = 'flex';
+        }
+
+        window.toggleSupply = function(studentId, supplyIndex, isChecked) {
+            const s = allStudents.find(x => x.id === studentId);
+            s.supplies[supplyIndex].checked = isChecked;
+            db.collection("students").doc(studentId).update({ supplies: s.supplies });
         }
 
         window.goToPayFromProfile = function() {
@@ -534,7 +508,7 @@
             window.openPayModal(currentStudentId);
         }
 
-        // --- نظام الأداء (الاستخلاص) ---
+        // --- Payments ---
         window.openPayModal = function(id) {
             currentStudentId = id;
             const s = allStudents.find(x => x.id === id);
@@ -543,7 +517,6 @@
             document.getElementById('payModalName').innerText = s.name;
             const tbody = document.getElementById('payTableBody');
             tbody.innerHTML = '';
-            
             const today = new Date(); today.setHours(0,0,0,0);
 
             s.payments.forEach((p, idx) => {
@@ -551,28 +524,26 @@
                 const diff = Math.ceil((due - today) / (1000*60*60*24));
                 const remaining = p.amount - p.paid;
 
-                let statusBadge = '';
-                if(remaining <= 0.5) statusBadge = '<span class="badge badge-paid">مدفوع</span>';
-                else if(p.paid > 0) statusBadge = `<span class="badge badge-partial">باقي ${Math.round(remaining)}</span>`;
-                else if(diff <= 0) statusBadge = '<span class="badge badge-due">واجب</span>';
-                else if(diff <= 3) statusBadge = '<span class="badge" style="background:#fff3cd">قريب</span>';
-                else statusBadge = '<span class="badge" style="background:#eee">قادم</span>';
+                let rowClass = '', statusText = '', actionBtn = '';
 
-                let actionBtn = '';
-                if(remaining <= 0.5) {
-                    actionBtn = `<button class="btn-primary" style="background:none; color:red; padding:2px; font-size:0.7em; width:auto" onclick="window.cancelPayment('${s.id}', ${idx})">إلغاء</button>`;
+                if (remaining <= 0.5) { 
+                    rowClass = 'background-color: #d4edda'; 
+                    statusText = 'مدفوع';
+                    actionBtn = `<i class="fas fa-check-circle" style="color:green; cursor:pointer" onclick="window.cancelPayment('${s.id}', ${idx})"></i>`;
+                } else if (p.paid > 0) { 
+                    rowClass = 'background-color: #fff3cd'; 
+                    statusText = `باقي: ${Math.round(remaining)}`;
+                    actionBtn = `<button class="btn-primary" style="background:#d35400; font-size:0.8rem; padding:5px" onclick="window.processPayment('${s.id}', ${idx})">الباقي: ${Math.round(remaining)}</button>`;
                 } else {
-                    // الزر الآن type="button" لمنع إعادة تحميل الصفحة
-                    const btnText = p.paid > 0 ? 'إتمام' : 'استخلاص';
-                    const btnColor = p.paid > 0 ? 'var(--partial-color)' : 'var(--accent-color)';
-                    actionBtn = `<button type="button" class="btn-primary" style="background:${btnColor}; padding:5px 10px; width:auto; font-size:0.8rem" onclick="window.processPayment('${s.id}', ${idx})">${btnText}</button>`;
+                    statusText = 'غير مدفوع';
+                    actionBtn = `<button class="btn-primary" style="font-size:0.8rem; padding:5px" onclick="window.processPayment('${s.id}', ${idx})">استخلاص</button>`;
                 }
 
                 tbody.innerHTML += `
-                    <tr>
-                        <td><b>${p.label}</b><br><small style="color:#777">${Math.round(p.paid)} / ${Math.round(p.amount)}</small></td>
+                    <tr style="${rowClass}">
+                        <td><b>${p.label}</b><br><small style="color:#555">${Math.round(p.paid)} / ${Math.round(p.amount)}</small></td>
                         <td style="font-size:0.8rem">${new Date(p.due).toLocaleDateString('ar-MA')}</td>
-                        <td>${statusBadge}</td>
+                        <td>${statusText}</td>
                         <td>${actionBtn}</td>
                     </tr>
                 `;
@@ -580,70 +551,37 @@
             document.getElementById('paymentModal').style.display = 'flex';
         }
 
-        window.processPayment = async function(studentId, idx) {
-            console.log("Start payment for:", studentId, "index:", idx); // Debug log
-            
+        window.processPayment = function(studentId, idx) {
             const s = allStudents.find(x => x.id === studentId);
-            if(!s) {
-                alert("لم يتم العثور على المتدرب!");
-                return;
-            }
-
             const p = s.payments[idx];
             const remaining = p.amount - p.paid;
 
             let input = prompt(`المبلغ المتبقي: ${Math.round(remaining)} درهم.\nأدخل المبلغ المدفوع الآن:`, Math.round(remaining));
-            
             if(input !== null) {
                 let amount = parseFloat(input);
-                if(isNaN(amount) || amount < 0) {
-                    alert("مبلغ غير صحيح");
-                    return;
-                }
-                
+                if(isNaN(amount) || amount < 0) return alert("مبلغ غير صحيح");
                 if(amount > remaining) amount = remaining;
-
-                // تحديث محلي
                 p.paid += amount;
-                
-                try {
-                    // حفظ في Firebase
-                    await db.collection("students").doc(studentId).update({ payments: s.payments });
-                    console.log("Payment saved successfully");
-                    // التحديث سيتم تلقائياً عبر المستمع، ولكن للاحتياط:
-                    window.openPayModal(studentId);
-                } catch (error) {
-                    console.error("Error updating payment:", error);
-                    alert("حدث خطأ أثناء حفظ الدفع: " + error.message);
-                }
+                db.collection("students").doc(studentId).update({ payments: s.payments });
             }
         }
 
-        window.cancelPayment = async function(studentId, idx) {
-            if(confirm("هل أنت متأكد من إلغاء الدفع؟")) {
+        window.cancelPayment = function(studentId, idx) {
+            if(confirm("إلغاء الدفع؟")) {
                 const s = allStudents.find(x => x.id === studentId);
                 s.payments[idx].paid = 0;
-                try {
-                    await db.collection("students").doc(studentId).update({ payments: s.payments });
-                } catch (error) {
-                    console.error(error);
-                    alert("خطأ في الإلغاء");
-                }
+                db.collection("students").doc(studentId).update({ payments: s.payments });
             }
         }
 
-        // --- المصاريف ---
+        // --- Expenses ---
         window.addExpense = function(e) {
             e.preventDefault();
-            const ex = {
+            db.collection("expenses").add({
                 desc: document.getElementById('exDesc').value,
                 amount: parseFloat(document.getElementById('exAmount').value),
                 date: document.getElementById('exDate').value
-            };
-            db.collection("expenses").add(ex).then(() => {
-                e.target.reset(); 
-                document.getElementById('exDate').value = new Date().toISOString().split('T')[0];
-            });
+            }).then(() => e.target.reset());
         }
 
         window.renderExpenses = function() {
@@ -654,11 +592,9 @@
             });
         }
 
-        // --- الإعدادات ---
+        // --- Settings ---
         window.updateSettingsUI = function() {
             document.getElementById('defTrainFee').value = appSettings.trainFee;
-            document.getElementById('sTrainFee').value = appSettings.trainFee;
-            
             const ul = document.getElementById('settingsSupplies');
             ul.innerHTML = '';
             (appSettings.supplies || []).forEach((s, i) => {
@@ -694,21 +630,40 @@
             }
         }
 
-        // --- لوحة التحكم ---
+        // --- Dashboard ---
+        window.showBalanceDetails = function() {
+            let inc = 0; allStudents.forEach(s => s.payments.forEach(p => inc += p.paid));
+            let exp = 0; allExpenses.forEach(e => exp += e.amount);
+            
+            document.getElementById('modalTotalIncome').innerText = Math.round(inc) + ' درهم';
+            document.getElementById('modalTotalExpenses').innerText = Math.round(exp) + ' درهم';
+            document.getElementById('modalNetBalance').innerText = Math.round(inc - exp) + ' درهم';
+            
+            document.getElementById('balanceModal').style.display = 'block';
+        }
+
         window.updateDashboard = function() {
             document.getElementById('totalStudents').innerText = allStudents.length;
-            
-            let inc = 0;
-            allStudents.forEach(s => s.payments.forEach(p => inc += p.paid));
-            let exp = 0;
-            allExpenses.forEach(e => exp += e.amount);
-            
+            let inc = 0; allStudents.forEach(s => s.payments.forEach(p => inc += p.paid));
+            let exp = 0; allExpenses.forEach(e => exp += e.amount);
             document.getElementById('totalIncome').innerText = Math.round(inc);
             document.getElementById('netBalance').innerText = Math.round(inc - exp);
 
+            // حساب مصاريف الشهر الحالي (الآن داخل نفس الخانة دون تكرار)
+            const now = new Date();
+            let currentMonthExp = 0;
+            allExpenses.forEach(e => {
+                const d = new Date(e.date);
+                if(d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()) {
+                    currentMonthExp += e.amount;
+                }
+            });
+            document.getElementById('currentMonthExpenses').innerText = Math.round(currentMonthExp);
+
             const missingTbody = document.querySelector('#missingTable tbody');
             const overdueTbody = document.querySelector('#overdueTable tbody');
-            missingTbody.innerHTML = ''; overdueTbody.innerHTML = '';
+            const upcomingTbody = document.querySelector('#upcomingTable tbody');
+            missingTbody.innerHTML = ''; overdueTbody.innerHTML = ''; upcomingTbody.innerHTML = '';
 
             const today = new Date(); today.setHours(0,0,0,0);
 
@@ -722,18 +677,97 @@
                     if(p.amount - p.paid > 0.5) {
                         const due = new Date(p.due); due.setHours(0,0,0,0);
                         const diff = Math.ceil((due - today)/(1000*60*60*24));
-                        
-                        if(diff <= 3) {
-                            const color = diff <= 0 ? 'red' : 'orange';
-                            const rem = Math.round(p.amount - p.paid);
-                            overdueTbody.innerHTML += `<tr><td>${s.name}</td><td>${p.label}</td><td style="color:${color}">${rem}</td></tr>`;
-                        }
+                        const row = `<tr class="clickable-row" onclick="window.openPayModal('${s.id}')"><td>${s.name}</td><td>${p.label}</td><td style="color:${diff<=0?'red':'orange'}">${Math.round(p.amount-p.paid)}</td></tr>`;
+                        if(diff <= 0) overdueTbody.innerHTML += row;
+                        else if(diff <= 3) upcomingTbody.innerHTML += row;
                     }
                 });
             });
             
             if(!missingTbody.innerHTML) missingTbody.innerHTML = '<tr><td colspan="2" style="text-align:center">لا توجد نواقص</td></tr>';
-            if(!overdueTbody.innerHTML) overdueTbody.innerHTML = '<tr><td colspan="3" style="text-align:center">لا توجد استحقاقات عاجلة</td></tr>';
+            if(!overdueTbody.innerHTML) overdueTbody.innerHTML = '<tr><td colspan="3" style="text-align:center">لا توجد متأخرات</td></tr>';
+            if(!upcomingTbody.innerHTML) upcomingTbody.innerHTML = '<tr><td colspan="3" style="text-align:center">لا توجد استحقاقات قريبة</td></tr>';
+
+            window.renderDashboardReports();
+        }
+
+        window.renderDashboardReports = function() {
+            const years = new Set();
+            allStudents.forEach(s => s.payments.forEach(p => { if(p.paid > 0) years.add(new Date(p.due).getFullYear()); }));
+            allExpenses.forEach(e => years.add(new Date(e.date).getFullYear()));
+            years.add(new Date().getFullYear());
+
+            const filter = document.getElementById('yearFilter');
+            const currentYear = filter.value || new Date().getFullYear();
+            filter.innerHTML = '';
+            Array.from(years).sort().reverse().forEach(y => {
+                filter.innerHTML += `<option value="${y}" ${y==currentYear?'selected':''}>${y}</option>`;
+            });
+
+            const container = document.getElementById('monthlyReportContainer');
+            const stats = {};
+            
+            allStudents.forEach(s => s.payments.forEach(p => {
+                if(p.paid > 0) {
+                    const d = new Date(p.due);
+                    if(d.getFullYear() == currentYear) {
+                        const m = d.getMonth();
+                        if(!stats[m]) stats[m] = {inc:0, exp:0, incomeDetails: [], expenseDetails: []};
+                        stats[m].inc += p.paid;
+                        stats[m].incomeDetails.push({ name: s.name, type: p.label, amount: p.paid });
+                    }
+                }
+            }));
+
+            allExpenses.forEach(e => {
+                const d = new Date(e.date);
+                if(d.getFullYear() == currentYear) {
+                    const m = d.getMonth();
+                    if(!stats[m]) stats[m] = {inc:0, exp:0, incomeDetails: [], expenseDetails: []};
+                    stats[m].exp += e.amount;
+                    stats[m].expenseDetails.push({ desc: e.desc, amount: e.amount, date: e.date });
+                }
+            });
+
+            let html = '<ul class="report-list">';
+            Object.keys(stats).sort((a,b)=>b-a).forEach(m => {
+                const st = stats[m];
+                const bal = st.inc - st.exp;
+                
+                let detailsHtml = '';
+                if (st.incomeDetails.length > 0) {
+                    detailsHtml += `<div class="detail-block"><div class="detail-title inc-title">تفاصيل المداخيل</div>`;
+                    st.incomeDetails.forEach(d => {
+                        detailsHtml += `<div class="detail-row"><span class="detail-name">${d.name} (${d.type})</span><span class="detail-amount" style="color:var(--success-color)">+${Math.round(d.amount)}</span></div>`;
+                    });
+                    detailsHtml += `</div>`;
+                }
+                if (st.expenseDetails.length > 0) {
+                    detailsHtml += `<div class="detail-block"><div class="detail-title exp-title">تفاصيل المصاريف</div>`;
+                    st.expenseDetails.forEach(d => {
+                        detailsHtml += `<div class="detail-row"><span class="detail-name">${d.desc} (${d.date})</span><span class="detail-amount" style="color:var(--danger-color)">-${Math.round(d.amount)}</span></div>`;
+                    });
+                    detailsHtml += `</div>`;
+                }
+
+                html += `
+                    <li class="report-item">
+                        <div class="report-header" onclick="this.nextElementSibling.classList.toggle('show')">
+                            <span>${arabicMonths[m]}</span>
+                            <span>${Math.round(bal)} dh</span>
+                        </div>
+                        <div class="report-details">
+                            <div class="report-row" style="background:#f9f9f9; padding:5px; font-weight:bold">
+                                <span>مجموع المداخيل: <span class="val-inc">${Math.round(st.inc)}</span></span>
+                                <span>مجموع المصاريف: <span class="val-exp">${Math.round(st.exp)}</span></span>
+                            </div>
+                            <hr style="margin:10px 0; border:0; border-top:1px solid #eee">
+                            ${detailsHtml}
+                        </div>
+                    </li>`;
+            });
+            html += '</ul>';
+            container.innerHTML = html;
         }
 
     </script>
