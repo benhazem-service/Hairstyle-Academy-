@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>تطبيق جمعية الحلاقة - المطور</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>تطبيق جمعية الحلاقة</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -15,13 +15,17 @@
             --primary-color: #2c3e50;
             --accent-color: #e67e22;
             --success-color: #27ae60;
-            --danger-color: #c0392b;
+            --danger-color: #e74c3c;
             --warning-color: #f39c12;
-            --bg-color: #f4f6f7;
+            --bg-color: #f8f9fa;
             --card-bg: #ffffff;
-            --text-color: #333;
-            --nav-height: 60px;
+            --text-color: #2d3436;
+            --border-color: #eab;
+            --nav-height: 65px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -29,100 +33,137 @@
             margin: 0;
             padding: 0;
             color: var(--text-color);
-            padding-bottom: calc(var(--nav-height) + 20px);
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            padding-bottom: calc(var(--nav-height) + 30px); /* مساحة للقائمة السفلية */
+            font-size: 16px; /* خط مريح للقراءة */
+            overflow-x: hidden;
         }
 
-        /* --- UI Components --- */
+        /* --- Header --- */
         .mobile-header {
-            background-color: var(--primary-color); color: white; padding: 15px;
-            text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            position: sticky; top: 0; z-index: 100;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
         }
+        .mobile-header h2 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+
+        /* --- Container & Cards --- */
+        .container { padding: 15px; max-width: 600px; margin: 0 auto; }
         
-        .container { padding: 15px; }
-        .section { display: none; animation: fadeIn 0.3s; }
+        .section { display: none; animation: fadeIn 0.3s ease-in-out; }
         .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .card {
-            background: var(--card-bg); border-radius: 12px; padding: 15px;
-            margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid #eee;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid #f0f0f0;
+            transition: transform 0.2s;
         }
+        .card:active { transform: scale(0.99); }
+
+        /* --- Stats Grid --- */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .stat-box {
+            background: white; padding: 15px; border-radius: 12px; text-align: center;
+            box-shadow: var(--shadow); cursor: pointer; border: 1px solid #eee;
+        }
+        .stat-box h4 { margin: 0 0 5px; color: #636e72; font-size: 0.85rem; }
+        .stat-box p { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--primary-color); }
 
         /* --- Forms --- */
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 0.9rem; }
-        .form-group input, .form-group select {
-            width: 100%; padding: 12px; border: 1px solid #ddd;
-            border-radius: 8px; box-sizing: border-box; background: #fafafa;
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; color: #444; }
+        input, select {
+            width: 100%; padding: 14px; border: 1px solid #ddd;
+            border-radius: 12px; font-size: 1rem; background-color: #fff;
+            transition: border-color 0.3s;
         }
+        input:focus { border-color: var(--accent-color); }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
         button.btn-primary {
-            background-color: var(--accent-color); color: white; border: none; padding: 12px;
-            border-radius: 8px; width: 100%; font-size: 1rem; font-weight: bold; cursor: pointer;
+            background-color: var(--accent-color); color: white; border: none; padding: 14px;
+            border-radius: 12px; width: 100%; font-size: 1rem; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); transition: 0.3s;
         }
+        button.btn-primary:active { transform: translateY(2px); }
 
         /* --- Tables --- */
-        .table-responsive { overflow-x: auto; }
+        .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; min-width: 100%; }
-        th, td { text-align: right; padding: 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        th { color: #777; font-weight: 600; white-space: nowrap; }
-        .clickable-name { font-weight: bold; color: var(--primary-color); border-bottom: 1px dashed #ccc; cursor: pointer; }
-        tr.clickable-row { cursor: pointer; transition: background 0.2s; }
-        tr.clickable-row:hover { background-color: #f9f9f9; }
+        th, td { text-align: right; padding: 14px 10px; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        th { color: #888; font-weight: 600; font-size: 0.8rem; white-space: nowrap; }
+        .clickable-name { font-weight: bold; color: var(--primary-color); border-bottom: 1px dotted #ccc; }
+
+        /* --- Badges --- */
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: bold; display: inline-block; }
+        .badge-paid { background: #d4edda; color: #155724; }
+        .badge-partial { background: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
+        .badge-due { background: #f8d7da; color: #721c24; }
 
         /* --- Navigation --- */
         .bottom-nav {
             position: fixed; bottom: 0; left: 0; width: 100%; height: var(--nav-height);
             background-color: #fff; display: flex; justify-content: space-around;
-            align-items: center; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
+            align-items: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.05); z-index: 2000;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            padding-bottom: env(safe-area-inset-bottom); /* لآيفون */
         }
-        .nav-item { border: none; background: none; color: #95a5a6; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; }
-        .nav-item.active { color: var(--accent-color); font-weight: bold; }
-        .nav-item i { font-size: 1.2rem; margin-bottom: 4px; }
+        .nav-item {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: #b2bec3; border: none; background: none; font-size: 0.75rem; transition: 0.3s;
+        }
+        .nav-item.active { color: var(--accent-color); }
+        .nav-item i { font-size: 1.4rem; margin-bottom: 4px; }
 
-        /* --- Stats --- */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .stat-box { background: white; padding: 15px; border-radius: 10px; text-align: center; border: 1px solid #eee; cursor: pointer; }
-        .stat-box:active { background: #f9f9f9; }
-        .stat-box p { margin: 5px 0 0; font-size: 1.2rem; font-weight: bold; color: var(--primary-color); }
-        .stat-box h4 { margin: 0; font-size: 0.9rem; color: #7f8c8d; }
-
-        /* --- Detailed Report --- */
+        /* --- Report Lists --- */
         .report-list { list-style: none; padding: 0; margin: 0; }
-        .report-item { border-bottom: 1px solid #eee; margin-bottom: 10px; border-radius: 8px; overflow: hidden; border: 1px solid #eee; }
-        .report-header { padding: 15px; display: flex; justify-content: space-between; cursor: pointer; background: #f8f9fa; font-weight: bold; }
-        .report-header:hover { background: #f1f1f1; }
-        .report-details { display: none; padding: 10px; background: #fff; animation: fadeIn 0.3s; }
+        .report-item { margin-bottom: 10px; border: 1px solid #eee; border-radius: 10px; overflow: hidden; }
+        .report-header { padding: 15px; display: flex; justify-content: space-between; cursor: pointer; background: #fff; font-weight: 600; }
+        .report-details { display: none; padding: 15px; background: #fafafa; border-top: 1px solid #eee; }
         .report-details.show { display: block; }
         
-        .detail-block { margin-bottom: 15px; }
-        .detail-title { font-size: 0.85rem; font-weight: bold; margin-bottom: 5px; padding-bottom: 5px; border-bottom: 2px solid #eee; display: flex; justify-content: space-between; }
-        .inc-title { color: var(--success-color); border-color: var(--success-color); }
-        .exp-title { color: var(--danger-color); border-color: var(--danger-color); }
+        .val-inc { color: var(--success-color); }
+        .val-exp { color: var(--danger-color); }
+
+        /* --- Modals (Bottom Sheet Style) --- */
+        .modal {
+            display: none; position: fixed; z-index: 3000; left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5); align-items: flex-end; opacity: 0; transition: opacity 0.3s;
+        }
+        .modal.show { display: flex; opacity: 1; }
+        .modal-content {
+            background: white; width: 100%; max-height: 85vh; 
+            border-top-left-radius: 25px; border-top-right-radius: 25px;
+            padding: 25px 20px; box-sizing: border-box; overflow-y: auto;
+            transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .modal.show .modal-content { transform: translateY(0); }
         
-        .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f9f9f9; font-size: 0.85rem; }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-name { color: #555; }
-        .detail-amount { font-weight: bold; }
-
-        /* --- Checkbox List --- */
-        .supply-checkbox-item { display: flex; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
-        .supply-checkbox-item input { width: 20px; height: 20px; margin-left: 10px; }
-
-        /* --- Modals --- */
-        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: flex-end; }
-        .modal-content { background: white; width: 100%; height: 90vh; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .modal-small .modal-content { height: auto; border-radius: 12px; width: 90%; margin: auto; top: 50%; transform: translateY(-50%); position: relative; }
+        /* Modal Small for Balance */
+        .modal-small .modal-content { max-height: auto; width: 90%; margin: auto; bottom: 0; position: relative; border-radius: 15px; transform: none; }
 
         /* --- Loading --- */
-        #loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff;
+            display: flex; justify-content: center; align-items: center; z-index: 9999; flex-direction: column;
+        }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-color); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Buttons Small */
+        .btn-icon { width: 32px; height: 32px; border-radius: 8px; border: none; color: white; display: inline-flex; align-items: center; justify-content: center; margin-left: 5px; }
+        .btn-blue { background: #3498db; } .btn-red { background: #e74c3c; }
 
     </style>
 </head>
@@ -130,7 +171,7 @@
 
     <div id="loading-overlay">
         <div class="spinner"></div>
-        <p style="margin-top:15px">جاري الاتصال...</p>
+        <p style="margin-top:15px; font-weight:600; color:#555">جاري التحميل...</p>
     </div>
 
     <div class="mobile-header">
@@ -141,11 +182,10 @@
         
         <!-- صفحة الرئيسية -->
         <div id="home" class="section active">
-            <!-- الرصيد الصافي -->
-            <div class="card" onclick="window.showBalanceDetails()" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; text-align: center; cursor: pointer;">
-                <p style="margin:0; opacity:0.8">الرصيد الصافي (اضغط للتفاصيل)</p>
-                <h1 id="netBalance" style="margin:5px 0">0</h1>
-                <p style="margin:0">درهم</p>
+            <div class="card" onclick="window.showBalanceDetails()" style="background: linear-gradient(135deg, #2c3e50, #34495e); color: white; text-align: center; padding: 25px;">
+                <p style="margin:0; opacity:0.8; font-size:0.9rem">الرصيد الصافي</p>
+                <h1 id="netBalance" style="margin:10px 0; font-size:2.8rem">0</h1>
+                <p style="margin:0; font-size:0.8rem">درهم مغربي</p>
             </div>
 
             <div class="stats-grid">
@@ -153,35 +193,32 @@
                     <h4>المتدربين</h4><p id="totalStudents">0</p>
                 </div>
                 <div class="stat-box" onclick="document.getElementById('monthlyReportCard').scrollIntoView({behavior: 'smooth'})">
-                    <h4>المداخيل الكلية</h4><p id="totalIncome" style="color:green">0</p>
+                    <h4>مداخيل (كلية)</h4><p id="totalIncome" style="color:var(--success-color)">0</p>
                 </div>
-                <!-- خانة مصاريف الشهر الجديد (تم تعديلها لتظهر مرة واحدة فقط) -->
                 <div class="stat-box" style="grid-column: span 2;">
                     <h4>مصاريف هذا الشهر</h4><p id="currentMonthExpenses" style="color:var(--danger-color)">0</p>
                 </div>
             </div>
 
-            <!-- الجداول -->
-            <div class="card" style="border-right: 4px solid var(--danger-color);">
-                <h3 style="color:var(--danger-color)"><i class="fas fa-exclamation-circle"></i> متأخرات الدفع (واجبة)</h3>
+            <div class="card" style="border-right: 5px solid var(--danger-color);">
+                <h3 style="color:var(--danger-color); font-size:1rem"><i class="fas fa-exclamation-circle"></i> متأخرات الدفع (واجبة)</h3>
                 <div class="table-responsive"><table id="overdueTable"><tbody></tbody></table></div>
             </div>
 
-            <div class="card" style="border-right: 4px solid var(--warning-color);">
-                <h3 style="color:var(--warning-color)"><i class="fas fa-clock"></i> استحقاق قريب (3 أيام)</h3>
+            <div class="card" style="border-right: 5px solid var(--warning-color);">
+                <h3 style="color:var(--warning-color); font-size:1rem"><i class="fas fa-clock"></i> استحقاق قريب (3 أيام)</h3>
                 <div class="table-responsive"><table id="upcomingTable"><tbody></tbody></table></div>
             </div>
 
-            <div class="card" style="border-right: 4px solid #3498db;">
-                <h3 style="color:#3498db"><i class="fas fa-file-contract"></i> نواقص ملفات التسجيل</h3>
+            <div class="card" style="border-right: 5px solid #3498db;">
+                <h3 style="color:#3498db; font-size:1rem"><i class="fas fa-file-contract"></i> نواقص ملفات التسجيل</h3>
                 <div class="table-responsive"><table id="missingTable"><tbody></tbody></table></div>
             </div>
 
-            <!-- التقرير الشهري المفصل -->
             <div class="card" id="monthlyReportCard">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <h3>التقرير الشهري المفصل</h3>
-                    <select id="yearFilter" onchange="window.renderDashboardReports()" style="padding:5px; width:80px"></select>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <h3 style="margin:0; font-size:1.1rem">التقرير الشهري</h3>
+                    <select id="yearFilter" onchange="window.renderDashboardReports()" style="padding:8px; border-radius:8px; border:1px solid #ddd;"></select>
                 </div>
                 <div id="monthlyReportContainer"></div>
             </div>
@@ -190,7 +227,7 @@
         <!-- صفحة المتدربين -->
         <div id="students" class="section">
             <div class="card">
-                <button class="btn-primary" onclick="window.toggleForm('studentForm')"><i class="fas fa-plus"></i> إضافة متدرب جديد</button>
+                <button class="btn-primary" onclick="window.toggleForm('studentForm')"><i class="fas fa-user-plus"></i> إضافة متدرب جديد</button>
                 <form id="studentForm" style="display:none; margin-top:20px;" onsubmit="window.addStudent(event)">
                     <div class="form-group"><label>الاسم الكامل</label><input type="text" id="sName" required></div>
                     <div class="form-row">
@@ -209,16 +246,16 @@
                     <div class="form-group"><label>مواد الحلاقة</label><input type="number" id="sMatFee"></div>
                     <div class="form-row">
                         <div class="form-group"><label>مبلغ المعدات</label><input type="number" id="sEquipFee"></div>
-                        <div class="form-group"><label>تقسيط المعدات</label><input type="number" id="sEquipDuration" value="1"></div>
+                        <div class="form-group"><label>تقسيط المعدات (أشهر)</label><input type="number" id="sEquipDuration" value="1"></div>
                     </div>
-                    <div class="form-group"><label>لوازم التسجيل</label><div id="suppliesChecklist"></div></div>
-                    <div class="form-group"><label>تسبيق</label><input type="number" id="sInitialPay"></div>
-                    <button type="submit" class="btn-primary">حفظ</button>
+                    <div class="form-group"><label>لوازم التسجيل</label><div id="suppliesChecklist" class="supplies-list"></div></div>
+                    <div class="form-group"><label style="color:var(--success-color)">تسبيق (اختياري)</label><input type="number" id="sInitialPay"></div>
+                    <button type="submit" class="btn-primary">حفظ البيانات</button>
                 </form>
             </div>
-            <input type="text" id="searchBox" placeholder="بحث..." onkeyup="window.renderStudents()" style="width:100%; padding:10px; margin-top:10px; border-radius:20px; border:1px solid #ccc;">
-            <div class="card table-responsive" style="margin-top:10px">
-                <table id="studentsTable"><thead><tr><th>الاسم</th><th>التقدم</th><th></th></tr></thead><tbody></tbody></table>
+            <input type="text" id="searchBox" placeholder="بحث بالاسم أو الهاتف..." onkeyup="window.renderStudents()" style="width:100%; padding:12px; margin-top:10px; border-radius:25px; border:1px solid #ccc; text-align:center;">
+            <div class="card table-responsive" style="margin-top:15px; padding:0; overflow:hidden;">
+                <table id="studentsTable" style="margin:0;"><thead><tr style="background:#f1f1f1"><th>الاسم</th><th>التقدم</th><th>إجراء</th></tr></thead><tbody></tbody></table>
             </div>
         </div>
 
@@ -251,7 +288,7 @@
                 </div>
                 <ul id="settingsSupplies" style="list-style:none; padding:0"></ul>
                 <hr>
-                <button class="btn-primary" style="background:var(--danger-color)" onclick="window.clearAllData()">تهيئة المصنع</button>
+                <button class="btn-primary" style="background:var(--danger-color)" onclick="window.clearAllData()">تهيئة المصنع (حذف الكل)</button>
             </div>
         </div>
 
@@ -268,43 +305,48 @@
     <!-- نافذة تفاصيل الرصيد -->
     <div id="balanceModal" class="modal modal-small">
         <div class="modal-content" style="text-align:center;">
-            <span onclick="document.getElementById('balanceModal').style.display='none'" style="float:left; font-size:24px; cursor:pointer">&times;</span>
-            <h3 style="color:var(--primary-color)">تفاصيل الرصيد</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0; color:var(--primary-color)">تفاصيل الرصيد</h3>
+                <span onclick="window.closeModal('balanceModal')" style="font-size:24px; cursor:pointer">&times;</span>
+            </div>
             <div style="margin:20px 0; font-size:1.1rem;">
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:10px;">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:15px 0;">
                     <span>مجموع المداخيل:</span>
-                    <span style="color:var(--success-color)" id="modalTotalIncome">0</span>
+                    <span style="color:var(--success-color); font-weight:bold;" id="modalTotalIncome">0</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:10px;">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #eee; padding:15px 0;">
                     <span>مجموع المصاريف:</span>
-                    <span style="color:var(--danger-color)" id="modalTotalExpenses">0</span>
+                    <span style="color:var(--danger-color); font-weight:bold;" id="modalTotalExpenses">0</span>
                 </div>
-                <div style="display:flex; justify-content:space-between; padding:10px; font-weight:bold; background:#f9f9f9; margin-top:10px; border-radius:8px;">
+                <div style="display:flex; justify-content:space-between; padding:15px; font-weight:bold; background:#f9f9f9; margin-top:15px; border-radius:12px;">
                     <span>الرصيد الصافي:</span>
                     <span style="color:var(--primary-color)" id="modalNetBalance">0</span>
                 </div>
             </div>
-            <button class="btn-primary" onclick="document.getElementById('balanceModal').style.display='none'">إغلاق</button>
         </div>
     </div>
 
     <!-- نافذة البروفايل -->
     <div id="profileModal" class="modal">
         <div class="modal-content">
-            <span onclick="document.getElementById('profileModal').style.display='none'" style="float:left; font-size:24px; cursor:pointer">&times;</span>
-            <h3 style="margin-top:0">ملف المتدرب</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0; color:var(--primary-color)">ملف المتدرب</h3>
+                <span onclick="window.closeModal('profileModal')" style="font-size:24px; cursor:pointer">&times;</span>
+            </div>
             <div id="profileContent"></div>
-            <h4 style="margin-bottom:5px">لوازم التسجيل (اضغط لتعديل الحالة):</h4>
+            <h4 style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">لوازم التسجيل (اضغط لتعديل الحالة):</h4>
             <div id="profileSuppliesList"></div>
-            <button class="btn-primary" style="margin-top:15px" onclick="window.goToPayFromProfile()">سجل الأداءات</button>
+            <button class="btn-primary" style="margin-top:20px" onclick="window.goToPayFromProfile()">سجل الأداءات</button>
         </div>
     </div>
 
     <!-- نافذة الأداءات -->
     <div id="paymentModal" class="modal">
         <div class="modal-content">
-            <span onclick="document.getElementById('paymentModal').style.display='none'" style="float:left; font-size:24px; cursor:pointer">&times;</span>
-            <h3 id="payModalName" style="margin-top:0"></h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 id="payModalName" style="margin:0; color:var(--primary-color)"></h3>
+                <span onclick="window.closeModal('paymentModal')" style="font-size:24px; cursor:pointer">&times;</span>
+            </div>
             <div class="table-responsive">
                 <table><thead><tr><th>البيان</th><th>تاريخ</th><th>الحالة</th><th></th></tr></thead><tbody id="payTableBody"></tbody></table>
             </div>
@@ -345,8 +387,8 @@
                 document.getElementById('loading-overlay').style.display = 'none';
                 window.renderStudents();
                 window.updateDashboard();
-                if(currentStudentId && document.getElementById('paymentModal').style.display === 'flex') window.openPayModal(currentStudentId);
-                if(currentStudentId && document.getElementById('profileModal').style.display === 'flex') window.openProfile(currentStudentId);
+                if(currentStudentId && document.getElementById('paymentModal').classList.contains('show')) window.openPayModal(currentStudentId);
+                if(currentStudentId && document.getElementById('profileModal').classList.contains('show')) window.openProfile(currentStudentId);
             });
 
             db.collection("expenses").onSnapshot(snap => {
@@ -385,7 +427,6 @@
             const cnie = document.getElementById('sCNIE').value;
             const regDate = document.getElementById('sRegDate').value;
             const duration = parseInt(document.getElementById('sDuration').value) || 9;
-            
             const regFee = parseFloat(document.getElementById('sRegFee').value) || 0;
             const trainFee = parseFloat(document.getElementById('sTrainFee').value) || 0;
             const matFee = parseFloat(document.getElementById('sMatFee').value) || 0;
@@ -446,12 +487,12 @@
 
                     tbody.innerHTML += `
                         <tr>
-                            <td><span class="clickable-name" onclick="window.openProfile('${s.id}')">${s.name}</span><br><small>${s.phone}</small></td>
-                            <td><div style="font-size:0.7em">${paidCount}/${trainParams.length} أشهر</div>
-                            <div style="height:5px; background:#eee; width:100%"><div style="height:100%; background:green; width:${percent}%"></div></div></td>
+                            <td><span class="clickable-name" onclick="window.openProfile('${s.id}')">${s.name}</span><br><small style="color:#777">${s.phone}</small></td>
+                            <td><div style="font-size:0.75em; margin-bottom:2px">${paidCount}/${trainParams.length} أشهر</div>
+                            <div style="height:6px; background:#eee; border-radius:3px; width:100%"><div style="height:100%; background:var(--success-color); border-radius:3px; width:${percent}%"></div></div></td>
                             <td>
-                                <button class="btn-primary" style="padding:5px 10px; width:auto" onclick="window.openPayModal('${s.id}')">أداء</button>
-                                <button class="btn-primary" style="padding:5px 10px; width:auto; background:red; margin-right:5px" onclick="window.deleteStudent('${s.id}')">حذف</button>
+                                <button class="btn-icon btn-blue" onclick="window.openPayModal('${s.id}')"><i class="fas fa-money-bill-wave"></i></button>
+                                <button class="btn-icon btn-red" onclick="window.deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button>
                             </td>
                         </tr>`;
                 }
@@ -473,13 +514,13 @@
             s.payments.forEach(p => { totalReq += p.amount; totalPaid += p.paid; });
 
             document.getElementById('profileContent').innerHTML = `
-                <p><strong>الاسم:</strong> ${s.name}</p>
+                <div style="text-align:center; margin-bottom:15px;"><div style="width:60px; height:60px; background:#eee; border-radius:50%; margin:0 auto; display:flex; align-items:center; justify-content:center; font-size:24px; color:var(--primary-color)">${s.name.charAt(0)}</div><h3 style="margin:5px 0">${s.name}</h3></div>
                 <p><strong>الهاتف:</strong> ${s.phone}</p>
                 <p><strong>السن:</strong> ${age} سنة</p>
                 <p><strong>تاريخ التسجيل:</strong> ${s.regDate}</p>
-                <div style="background:#f9f9f9; padding:10px; border-radius:5px; margin:10px 0;">
-                    <p><strong>المدفوع:</strong> <span style="color:green">${Math.round(totalPaid)}</span></p>
-                    <p><strong>المتبقي:</strong> <span style="color:red">${Math.round(totalReq - totalPaid)}</span></p>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:15px 0;">
+                    <div style="background:#e8f6f3; padding:10px; border-radius:10px; text-align:center"><small>المدفوع</small><div style="color:var(--success-color); font-weight:bold">${Math.round(totalPaid)}</div></div>
+                    <div style="background:#fcebeb; padding:10px; border-radius:10px; text-align:center"><small>المتبقي</small><div style="color:var(--danger-color); font-weight:bold">${Math.round(totalReq - totalPaid)}</div></div>
                 </div>
             `;
 
@@ -489,12 +530,11 @@
                 s.supplies.forEach((sup, index) => {
                     const itemDiv = document.createElement('div');
                     itemDiv.className = 'supply-checkbox-item';
-                    itemDiv.style.background = sup.checked ? '#d4edda' : '#f8d7da';
                     itemDiv.innerHTML = `<span style="flex-grow:1">${sup.name}</span><input type="checkbox" ${sup.checked ? 'checked' : ''} onchange="window.toggleSupply('${s.id}', ${index}, this.checked)">`;
                     suppliesListDiv.appendChild(itemDiv);
                 });
             }
-            document.getElementById('profileModal').style.display = 'flex';
+            showModal('profileModal');
         }
 
         window.toggleSupply = function(studentId, supplyIndex, isChecked) {
@@ -504,7 +544,7 @@
         }
 
         window.goToPayFromProfile = function() {
-            document.getElementById('profileModal').style.display = 'none';
+            window.closeModal('profileModal');
             window.openPayModal(currentStudentId);
         }
 
@@ -529,14 +569,14 @@
                 if (remaining <= 0.5) { 
                     rowClass = 'background-color: #d4edda'; 
                     statusText = 'مدفوع';
-                    actionBtn = `<i class="fas fa-check-circle" style="color:green; cursor:pointer" onclick="window.cancelPayment('${s.id}', ${idx})"></i>`;
+                    actionBtn = `<i class="fas fa-check-circle" style="color:green; font-size:1.5rem; cursor:pointer" onclick="window.cancelPayment('${s.id}', ${idx})"></i>`;
                 } else if (p.paid > 0) { 
                     rowClass = 'background-color: #fff3cd'; 
                     statusText = `باقي: ${Math.round(remaining)}`;
-                    actionBtn = `<button class="btn-primary" style="background:#d35400; font-size:0.8rem; padding:5px" onclick="window.processPayment('${s.id}', ${idx})">الباقي: ${Math.round(remaining)}</button>`;
+                    actionBtn = `<button class="btn-primary" style="background:#d35400; padding:5px 10px; font-size:0.8rem; width:auto" onclick="window.processPayment('${s.id}', ${idx})">الباقي: ${Math.round(remaining)}</button>`;
                 } else {
                     statusText = 'غير مدفوع';
-                    actionBtn = `<button class="btn-primary" style="font-size:0.8rem; padding:5px" onclick="window.processPayment('${s.id}', ${idx})">استخلاص</button>`;
+                    actionBtn = `<button class="btn-primary" style="padding:5px 10px; font-size:0.8rem; width:auto" onclick="window.processPayment('${s.id}', ${idx})">استخلاص</button>`;
                 }
 
                 tbody.innerHTML += `
@@ -548,7 +588,7 @@
                     </tr>
                 `;
             });
-            document.getElementById('paymentModal').style.display = 'flex';
+            showModal('paymentModal');
         }
 
         window.processPayment = function(studentId, idx) {
@@ -567,7 +607,7 @@
         }
 
         window.cancelPayment = function(studentId, idx) {
-            if(confirm("إلغاء الدفع؟")) {
+            if(confirm("إلغاء هذا الدفع؟")) {
                 const s = allStudents.find(x => x.id === studentId);
                 s.payments[idx].paid = 0;
                 db.collection("students").doc(studentId).update({ payments: s.payments });
@@ -639,7 +679,7 @@
             document.getElementById('modalTotalExpenses').innerText = Math.round(exp) + ' درهم';
             document.getElementById('modalNetBalance').innerText = Math.round(inc - exp) + ' درهم';
             
-            document.getElementById('balanceModal').style.display = 'block';
+            showModal('balanceModal');
         }
 
         window.updateDashboard = function() {
@@ -649,7 +689,7 @@
             document.getElementById('totalIncome').innerText = Math.round(inc);
             document.getElementById('netBalance').innerText = Math.round(inc - exp);
 
-            // حساب مصاريف الشهر الحالي (الآن داخل نفس الخانة دون تكرار)
+            // مصاريف الشهر الحالي
             const now = new Date();
             let currentMonthExp = 0;
             allExpenses.forEach(e => {
@@ -658,7 +698,17 @@
                     currentMonthExp += e.amount;
                 }
             });
-            document.getElementById('currentMonthExpenses').innerText = Math.round(currentMonthExp);
+            const statsGrid = document.querySelector('.stats-grid');
+            if(!document.getElementById('currentMonthExpBox')) {
+                const div = document.createElement('div');
+                div.className = 'stat-box';
+                div.id = 'currentMonthExpBox';
+                div.style.gridColumn = "span 2";
+                div.innerHTML = `<h4>مصاريف هذا الشهر</h4><p style="color:var(--danger-color)">${Math.round(currentMonthExp)}</p>`;
+                statsGrid.appendChild(div);
+            } else {
+                document.querySelector('#currentMonthExpBox p').innerText = Math.round(currentMonthExp);
+            }
 
             const missingTbody = document.querySelector('#missingTable tbody');
             const overdueTbody = document.querySelector('#overdueTable tbody');
@@ -768,6 +818,16 @@
             });
             html += '</ul>';
             container.innerHTML = html;
+        }
+
+        // --- Helpers for Modal ---
+        window.showModal = function(id) {
+            const m = document.getElementById(id);
+            m.classList.add('show');
+        }
+        window.closeModal = function(id) {
+            const m = document.getElementById(id);
+            m.classList.remove('show');
         }
 
     </script>
